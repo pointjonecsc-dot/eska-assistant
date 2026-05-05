@@ -1,0 +1,2 @@
+# eska-assistant
+ai modle
