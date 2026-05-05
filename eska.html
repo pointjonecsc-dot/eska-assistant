@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>ESKA Assistant Pro</title>
+
+<style>
+body {
+  background: black;
+  color: #00ffcc;
+  font-family: Arial;
+  text-align: center;
+  padding-top: 80px;
+}
+
+button {
+  padding: 15px 30px;
+  font-size: 18px;
+  border-radius: 10px;
+  background: #00ffcc;
+  border: none;
+  cursor: pointer;
+}
+
+#output {
+  margin-top: 30px;
+  font-size: 20px;
+}
+</style>
+</head>
+
+<body>
+
+<h1>🤖 ESKA Assistant Pro</h1>
+<button onclick="startListening()">🎤 Speak</button>
+<div id="output">Say "Hello ESKA"</div>
+
+<script>
+const output = document.getElementById("output");
+
+// SPEECH RECOGNITION
+function startListening() {
+  const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+  recognition.lang = "en-IN";
+
+  recognition.onresult = function(event) {
+    let command = event.results[0][0].transcript.toLowerCase();
+    output.innerHTML = "You: " + command;
+    handleCommand(command);
+  };
+
+  recognition.start();
+}
+
+// TEXT TO SPEECH
+function speak(text) {
+  const speech = new SpeechSynthesisUtterance(text);
+  speech.lang = "en-IN";
+  window.speechSynthesis.speak(speech);
+}
+
+// WEATHER API
+async function getWeather(city="Varanasi") {
+  const apiKey = "YOUR_API_KEY"; // 🔑 Put your API key here
+  const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=${apiKey}`;
+
+  try {
+    const res = await fetch(url);
+    const data = await res.json();
+
+    let temp = data.main.temp;
+    let desc = data.weather[0].description;
+
+    speak(`Temperature in ${city} is ${temp} degree celsius with ${desc}`);
+  } catch {
+    speak("Unable to fetch weather");
+  }
+}
+
+// WIKIPEDIA API
+async function searchWiki(query) {
+  const url = `https://en.wikipedia.org/api/rest_v1/page/summary/${query}`;
+
+  try {
+    const res = await fetch(url);
+    const data = await res.json();
+
+    speak(data.extract);
+  } catch {
+    speak("No information found");
+  }
+}
+
+// COMMAND HANDLER
+function handleCommand(cmd) {
+
+  if (cmd.includes("hello eska")) {
+    speak("Hello! How can I help you?");
+  }
+
+  else if (cmd.includes("open youtube")) {
+    speak("Opening YouTube");
+    window.open("https://youtube.com", "_blank");
+  }
+
+  else if (cmd.includes("open google")) {
+    speak("Opening Google");
+    window.open("https://google.com", "_blank");
+  }
+
+  else if (cmd.includes("play music")) {
+    speak("Playing music");
+    window.open("https://youtube.com/results?search_query=music", "_blank");
+  }
+
+  else if (cmd.includes("time")) {
+    let time = new Date().toLocaleTimeString();
+    speak("Current time is " + time);
+  }
+
+  else if (cmd.includes("weather")) {
+    speak("Fetching weather");
+    getWeather("Varanasi");
+  }
+
+  else if (cmd.includes("search")) {
+    let query = cmd.replace("search", "").trim();
+    speak("Searching Wikipedia for " + query);
+    searchWiki(query);
+  }
+
+  else if (cmd.includes("open instagram")) {
+    speak("Opening Instagram");
+    window.open("https://instagram.com", "_blank");
+  }
+
+  else if (cmd.includes("open whatsapp")) {
+    speak("Opening WhatsApp Web");
+    window.open("https://web.whatsapp.com", "_blank");
+  }
+
+  else {
+    speak("Sorry, I did not understand");
+  }
+}
+</script>
+
+</body>
+</html>
